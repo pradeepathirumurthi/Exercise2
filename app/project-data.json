@@ -1,0 +1,52 @@
+{
+  "projects": [
+    {
+      "name": "Community Hub",
+      "owner": "Ari Patel",
+      "status": "In progress",
+      "recentActivity": "Member directory approved for handoff",
+      "priority": "High",
+      "summary": "Bringing community resources and conversations into one welcoming place."
+    },
+    {
+      "name": "Open Source Grants",
+      "owner": "Jordan Lee",
+      "status": "On track",
+      "recentActivity": "Spring applications opened this week",
+      "priority": "High",
+      "summary": "Helping maintainers find the support to keep great projects growing."
+    },
+    {
+      "name": "Docs Refresh",
+      "owner": "Sam Rivera",
+      "status": "In review",
+      "recentActivity": "Quick-start guide ready for feedback",
+      "priority": "Medium",
+      "summary": "Making the first five minutes with our tools feel effortless."
+    },
+    {
+      "name": "Accessibility Pass",
+      "owner": "Taylor Kim",
+      "status": "In progress",
+      "recentActivity": "Keyboard-flow audit underway",
+      "priority": "High",
+      "summary": "Clearing barriers so every contributor can take part."
+    },
+    {
+      "name": "Summer Showcase",
+      "owner": "Morgan Chen",
+      "status": "Planning",
+      "recentActivity": "Save-the-date draft shared with the team",
+      "priority": "Low",
+      "summary": "Celebrating the people and ideas moving open source forward."
+    },
+    {
+      "name": "Contributor Toolkit",
+      "owner": "Casey Brooks",
+      "status": "On track",
+      "recentActivity": "New issue templates published",
+      "priority": "Medium",
+      "summary": "A friendly collection of guides and tools for making a first contribution."
+    }
+  ]
+}

@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f4f5ef">
+    <meta
+      name="description"
+      content="A clear, contributor-friendly pulse on Mona's active projects."
+    >
+    <title>Project Pulse</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preload" href="project-data.json" as="fetch" crossorigin>
+  </head>
+  <body>
+    <div class="site-shell">
+      <header class="topbar">
+        <a class="brand" href="#main" aria-label="Project Pulse home">
+          <span class="brand-mark" aria-hidden="true">p</span>
+          <span>MONA<span class="brand-divider">/</span>TEAM</span>
+        </a>
+        <p class="topbar-note"><span class="live-dot" aria-hidden="true"></span> TEAM OVERVIEW</p>
+      </header>
+
+      <main id="main" class="dashboard">
+        <section class="intro" aria-labelledby="page-title">
+          <div class="intro-copy">
+            <p class="eyebrow"><span class="eyebrow-rule" aria-hidden="true"></span> THE WORK, AT A GLANCE</p>
+            <h1 id="page-title">Project <span>Pulse</span></h1>
+            <p class="intro-text">A little clarity goes a long way. See what’s moving, who’s on it, and where a hand might help.</p>
+          </div>
+          <aside class="snapshot" aria-label="Dashboard summary">
+            <span class="snapshot-label">YOUR TEAM, IN MOTION</span>
+            <p class="snapshot-count"><span id="project-count">—</span><span class="snapshot-count-label">projects</span></p>
+            <span id="updated-label" class="snapshot-updated">A clear view of what’s next</span>
+          </aside>
+        </section>
+
+        <section class="work-section" aria-labelledby="projects-heading">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">THE LINEUP</p>
+              <h2 id="projects-heading">Across the team</h2>
+            </div>
+            <p class="section-aside"><span class="live-dot" aria-hidden="true"></span> A shared view of the work</p>
+          </div>
+          <div id="project-list" class="project-grid" aria-live="polite" aria-busy="true"></div>
+          <p id="load-message" class="load-message" role="status">Gathering the latest project details…</p>
+        </section>
+      </main>
+
+      <footer class="footer">
+        <span>MADE FOR THE PEOPLE MOVING IT FORWARD</span>
+        <span class="footer-spark" aria-hidden="true">✳</span>
+        <span>MONA’S TEAM <span id="current-year"></span></span>
+      </footer>
+    </div>
+    <script>
+      const projectList = document.querySelector("#project-list");
+      const projectCount = document.querySelector("#project-count");
+      const loadMessage = document.querySelector("#load-message");
+      const updatedLabel = document.querySelector("#updated-label");
+
+      function createDetail(label, value, className) {
+        const wrapper = document.createElement("div");
+        wrapper.className = `project-detail ${className}`;
+
+        const detailLabel = document.createElement("dt");
+        detailLabel.textContent = label;
+
+        const detailValue = document.createElement("dd");
+        detailValue.textContent = value;
+
+        wrapper.append(detailLabel, detailValue);
+        return wrapper;
+      }
+
+      function createProjectCard(project, index) {
+        const article = document.createElement("article");
+        article.className = "project-card";
+        article.style.setProperty("--card-index", index);
+
+        const header = document.createElement("div");
+        header.className = "card-header";
+
+        const identity = document.createElement("div");
+        identity.className = "project-identity";
+
+        const number = document.createElement("span");
+        number.className = "project-number";
+        number.setAttribute("aria-hidden", "true");
+        number.textContent = String(index + 1).padStart(2, "0");
+
+        const title = document.createElement("h3");
+        title.className = "project-name";
+        title.textContent = project.name;
+        identity.append(number, title);
+
+        const status = document.createElement("span");
+        status.className = "status-badge";
+        status.dataset.status = project.status.toLowerCase().replaceAll(" ", "-");
+        status.textContent = project.status;
+        header.append(identity, status);
+
+        const summary = document.createElement("p");
+        summary.className = "project-summary";
+        summary.textContent = project.summary;
+
+        const details = document.createElement("dl");
+        details.className = "project-details";
+        details.append(
+          createDetail("Project lead", project.owner, "owner-detail"),
+          createDetail("Recent activity", project.recentActivity, "activity-detail"),
+        );
+
+        const footer = document.createElement("div");
+        footer.className = "card-footer";
+
+        const priorityLabel = document.createElement("span");
+        priorityLabel.className = "priority-label";
+        priorityLabel.textContent = "PRIORITY";
+
+        const priority = document.createElement("span");
+        priority.className = "priority-badge";
+        priority.dataset.priority = project.priority.toLowerCase();
+        priority.textContent = project.priority;
+        footer.append(priorityLabel, priority);
+
+        article.append(header, summary, details, footer);
+        return article;
+      }
+
+      async function loadProjects() {
+        try {
+          const response = await fetch("project-data.json");
+          if (!response.ok) {
+            throw new Error(`Project data request failed with status ${response.status}.`);
+          }
+
+          const data = await response.json();
+          if (!Array.isArray(data.projects) || data.projects.length === 0) {
+            throw new Error("Project data must contain a non-empty projects array.");
+          }
+
+          const requiredFields = ["name", "owner", "status", "recentActivity", "priority", "summary"];
+          data.projects.forEach((project, index) => {
+            const missingField = requiredFields.find(
+              (field) => typeof project[field] !== "string" || !project[field].trim(),
+            );
+            if (missingField) {
+              throw new Error(`Project ${index + 1} is missing a valid ${missingField} value.`);
+            }
+          });
+
+          projectList.replaceChildren(...data.projects.map(createProjectCard));
+          projectCount.textContent = String(data.projects.length).padStart(2, "0");
+          updatedLabel.textContent = `${data.projects.length} projects in view`;
+          loadMessage.hidden = true;
+        } catch (error) {
+          loadMessage.textContent = `Projects couldn’t be loaded. ${error.message}`;
+          loadMessage.classList.add("load-message-error");
+        } finally {
+          projectList.setAttribute("aria-busy", "false");
+        }
+      }
+
+      document.querySelector("#current-year").textContent = new Date().getFullYear();
+      loadProjects();
+    </script>
+  </body>
+</html>
